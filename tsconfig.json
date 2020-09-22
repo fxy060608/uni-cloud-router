@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "declaration": false,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext"]
+  },
+  "include": ["src", "types/uniCloud.d.ts"]
+}
