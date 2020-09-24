@@ -11,8 +11,7 @@
     "test": "jest",
     "build": "rollup -c",
     "lint": "eslint --ext .ts src __tests__",
-    "format": "prettier --write --parser typescript \"src/**/*.ts?(x)\" \"__tests__/**/*.ts?(x)\"",
-    "publish": "clean-publish"
+    "format": "prettier --write --parser typescript \"src/**/*.ts?(x)\" \"__tests__/**/*.ts?(x)\""
   },
   "keywords": [],
   "author": "fxy060608",
@@ -25,7 +24,6 @@
     "@types/koa-compose": "^3.2.5",
     "@types/node": "^14.10.2",
     "@typescript-eslint/parser": "^4.1.1",
-    "clean-publish": "^1.1.8",
     "eslint": "^7.9.0",
     "jest": "^26.4.2",
     "koa-compose": "^4.1.0",
