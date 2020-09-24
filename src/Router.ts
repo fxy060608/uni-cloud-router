@@ -4,8 +4,14 @@ import path from 'path'
 import compose from 'koa-compose'
 import { EventEmitter } from 'events'
 
-import { createRouteMatch, MatchOptions, runInUniCloud } from './utils'
+import {
+  createRouteMatch,
+  FAILED_CODE,
+  MatchOptions,
+  runInUniCloud,
+} from './utils'
 import { createContext, ExtendableContext } from './BaseContext'
+import { http, parseAction } from './middleware/http'
 
 type ConfigMiddleware<StateT = DefaultState, CustomT = DefaultContext> = Array<
   [Middleware<StateT, CustomT>, MatchOptions?]
@@ -41,21 +47,24 @@ export class Router<
   StateT = DefaultState,
   CustomT = DefaultContext
 > extends EventEmitter {
+  private config: Record<string, any>
   private middleware: Middleware<StateT, CustomT>[]
   private serviceDir: string
   private controllerDir: string
 
-  constructor(options: RouterOptions<StateT, CustomT>) {
+  constructor(config: RouterOptions<StateT, CustomT>) {
     super()
     this.middleware = []
-    const { baseDir, middleware } = options
+    this.config = config || {}
 
+    const { baseDir = process.cwd(), middleware } = this.config
     this.serviceDir = path.resolve(baseDir, SERVICE_DIR)
     this.controllerDir = path.resolve(baseDir, CONTROLLER_DIR)
 
     this.initMiddleware(middleware)
   }
   initMiddleware(middleware?: ConfigMiddleware<StateT, CustomT>) {
+    this.use(http) // http url
     if (!Array.isArray(middleware)) {
       return
     }
@@ -91,44 +100,68 @@ export class Router<
    */
   async serve(event?: UniCloudEvent, context?: UniCloudContext) {
     const ctx = createContext<StateT, CustomT>(
+      this.config,
       event || (runInUniCloud && uniCloud.$args),
       context || (runInUniCloud && uniCloud.$ctx),
-      this.serviceDir
+      this.serviceDir,
+      this.controllerDir
     )
     const controller = this.controller(ctx)
     const fn = compose(this.middleware.concat(controller))
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       fn(ctx)
         .then(() => {
           resolve(this.respond(ctx))
         })
-        .catch(reject)
+        .catch((err) => {
+          ctx.body = {
+            code: err.code || FAILED_CODE,
+            message: err.message || err,
+          }
+          resolve(this.respond(ctx))
+        })
     })
   }
   controller(ctx: Context) {
-    const action = ctx.event.action
+    const action = parseAction(ctx.event)
     if (!action) {
       throw new Error('action is required')
     }
-    if (action.indexOf('/') === -1) {
+    const paths = action.split('/').filter(Boolean)
+    const len = paths.length
+    if (len === 1) {
       throw new Error('action must contain "/"')
     }
-    const lastIndex = action.lastIndexOf('/')
-    const methodName = action.substr(lastIndex + 1)
-    const controllerPath = path.join(
-      this.controllerDir,
-      action.substr(0, lastIndex)
-    )
-    /* eslint-disable no-restricted-globals */
-    let ControllerClass = require(controllerPath)
-
-    ControllerClass = ControllerClass.default || ControllerClass
-    const controller = new ControllerClass(ctx)
+    const methodName = paths[len - 1]
+    let controller = ctx.controller
+    for (let i = 0; i < len - 1; i++) {
+      controller = controller[paths[i]]
+    }
+    if (!controller) {
+      throw new Error(
+        `controller/${action.replace(
+          new RegExp('/' + methodName + '$'),
+          ''
+        )} not found`
+      )
+    }
     const method = controller[methodName]
     if (typeof method !== 'function') {
-      throw new Error(`${controllerPath}.${methodName} is not a function`)
+      throw new Error(
+        `controller/${action.replace(
+          new RegExp('/' + methodName + '$'),
+          '.' + methodName
+        )} is not a function`
+      )
     }
-    return method.bind(controller)
+    const middleware = async function (ctx: Context) {
+      const ret = await method.call(controller, ctx)
+      if (typeof ret !== 'undefined') {
+        ctx.body = ret
+      }
+    }
+    middleware._name = methodName
+    return middleware
   }
   respond(ctx: Context) {
     return ctx.body

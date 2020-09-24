@@ -1,11 +1,10 @@
-import { HttpClient } from 'urllib'
+import { request, HttpClient } from 'urllib'
 import { Db } from '@cloudbase/database'
-
+import { DefaultContext, DefaultState } from 'koa'
 import noader from 'noader'
 
 import { Context } from './Router'
 import { runInUniCloud } from './utils'
-import { DefaultContext, DefaultState } from 'koa'
 
 export interface ExtendableContext {
   event: {
@@ -13,45 +12,72 @@ export interface ExtendableContext {
     action: string
   }
   context: any
+  config: Record<string, any>
   service: Record<string, any>
+  controller: Record<string, any>
+  // request
+  query: Record<string, any>
+  data: Record<string, any>
   // response
+  status: number // http only
+  headers: Record<string, string> // http only
+  set(_field: { [key: string]: string }): void // http only
+  set(_field: string, _val: string | string[]): void // http only
   body: Record<string, any>
   // uniCloud
   db: Db
+  curl: typeof request
   httpclient: HttpClient
 }
 
 export class BaseContext {
   ctx: Context
   db: Db
+  config: Record<string, any>
   service: Record<string, any>
+  controller: Record<string, any>
+  curl: typeof request
   httpclient: HttpClient
 
   constructor(ctx: Context) {
     this.ctx = ctx
-    // request
+    // utils
+    this.config = ctx.config
     this.service = ctx.service
+    this.controller = ctx.controller
     // uniCloud
     this.db = ctx.db
+    this.curl = ctx.curl
     this.httpclient = ctx.httpclient
   }
 }
 
 export function createContext<StateT = DefaultState, CustomT = DefaultContext>(
+  config: Record<string, any>,
   event: UniCloudEvent,
   context: UniCloudContext,
-  serviceDir: string
+  serviceDir: string,
+  controllerDir: string
 ) {
   const ctx = {
     state: {},
     event,
     context,
   } as Context<StateT, CustomT>
-  // request
+  // utils
+  ctx.config = config
   ctx.service = noader(serviceDir, ctx)
+  ctx.controller = noader(controllerDir, ctx)
+  // request
+  ctx.query = Object.create(null)
+  ctx.data = event
+  // response
+  ctx.status = 200
+  ctx.headers = Object.create(null)
   // uniCloud
   if (runInUniCloud) {
     ctx.db = uniCloud.database()
+    ctx.curl = uniCloud.httpclient.request
     ctx.httpclient = uniCloud.httpclient
   }
   return ctx

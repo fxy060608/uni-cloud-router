@@ -1,8 +1,11 @@
 import { pathToRegexp } from 'path-to-regexp'
+import { Context } from './Router'
 
-type MatchFn = (_ctx: unknown) => boolean
+type MatchFn = (_ctx: Context) => boolean
 
 type Condition = string | RegExp | MatchFn | Condition[]
+
+export const FAILED_CODE = 'INVOKE_FUNCTION_FAILED'
 
 export const runInUniCloud = typeof uniCloud !== 'undefined'
 
@@ -52,7 +55,7 @@ export function createRouteMatch(options?: MatchOptions) {
     throw new Error('options.match and options.ignore can not both present')
   }
   const matchFn = match ? routeMatch(match) : routeMatch(ignore!)
-  return function routeMatch(ctx: unknown) {
+  return function routeMatch(ctx: Context) {
     const matched = matchFn(ctx)
     return match ? matched : !matched
   }

@@ -22,13 +22,13 @@ module.exports = {
     file: 'dist/index.js',
     format: `commonjs`,
   },
-  external: ['fs', 'path', 'events', 'tty', 'util', 'os'],
+  external: ['fs', 'path', 'events', 'tty', 'util', 'os', 'querystring'],
   plugins: [
     nodeResolve(),
     commonjs({
-      ignore: ['conditional-runtime-dependency'],// 使用旧版本 rollup-plugin-commonjs 解决 dynamic require
+      ignore: ['conditional-runtime-dependency'], // 使用旧版本 rollup-plugin-commonjs 解决 dynamic require
     }),
     tsPlugin,
-    terser()
+    terser(),
   ],
 }

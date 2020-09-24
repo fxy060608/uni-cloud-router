@@ -15,7 +15,7 @@
     "publish": "clean-publish"
   },
   "keywords": [],
-  "author": "",
+  "author": "fxy060608",
   "license": "ISC",
   "devDependencies": {
     "@cloudbase/database": "^1.2.2",

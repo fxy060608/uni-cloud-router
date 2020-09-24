@@ -9,7 +9,9 @@ const router = new Router({
 const uniCloudContext = {}
 const auth = async (ctx: Context, next: Next) => {
   if (!ctx.event.token) {
-    throw new Error('auth failed')
+    const err = new Error('auth failed')
+    ;(err as any).code = 20001
+    throw err
   }
   await next()
 }
@@ -31,25 +33,22 @@ describe('Router', () => {
     ).rejects.toEqual(new Error('action must contain "/"'))
   })
   test('controller is not found', async () => {
-    try {
-      await router.serve({ action: 'admin/login' }, uniCloudContext)
-    } catch (e) {
-      expect(e.message).toContain('Cannot find module')
-    }
+    await expect(
+      router.serve({ action: 'admin/login' }, uniCloudContext)
+    ).rejects.toEqual(new Error(`controller/admin not found`))
   })
   test('method is not a function', async () => {
     await expect(
       router.serve({ action: 'user/logout' }, uniCloudContext)
-    ).rejects.toEqual(
-      new Error(
-        `${path.join(baseDir, 'controller/user.logout')} is not a function`
-      )
-    )
+    ).rejects.toEqual(new Error(`controller/user.logout is not a function`))
   })
   test('auth failed', async () => {
-    await expect(
-      router.use(auth).serve({ action: 'user/update' }, uniCloudContext)
-    ).rejects.toEqual(new Error(`auth failed`))
+    expect(
+      await router.use(auth).serve({ action: 'user/update' }, uniCloudContext)
+    ).toEqual({
+      code: 20001,
+      message: 'auth failed',
+    })
   })
   test('auth success', async () => {
     expect(
@@ -57,5 +56,61 @@ describe('Router', () => {
         .use(auth)
         .serve({ action: 'user/update', token: '123' }, uniCloudContext)
     ).toStrictEqual({ id: 1 })
+  })
+  test('data', async () => {
+    expect(
+      await router.serve(
+        { action: 'user/data', token: 1, body: { a: 1 } },
+        uniCloudContext
+      )
+    ).toEqual({ a: 1 })
+  })
+  describe('http', () => {
+    test('action must contain "/"', async () => {
+      await expect(
+        router.serve({ path: '/user' }, uniCloudContext)
+      ).rejects.toEqual(new Error('action must contain "/"'))
+    })
+    test('controller is not found', async () => {
+      await expect(
+        router.serve({ path: '/admin/login' }, uniCloudContext)
+      ).rejects.toEqual(new Error(`controller/admin not found`))
+    })
+    test('auth failed', async () => {
+      expect(
+        await router.use(auth).serve({ action: 'user/update' }, uniCloudContext)
+      ).toEqual({
+        code: 20001,
+        message: 'auth failed',
+      })
+    })
+    test('get', async () => {
+      expect(
+        ((await router.serve(
+          {
+            path: '/user/data',
+            token: 1,
+            httpMethod: 'GET',
+            headers: {},
+            queryStringParameters: { body: { a: 1 } },
+          },
+          uniCloudContext
+        )) as any).body
+      ).toEqual(JSON.stringify({ a: 1 }))
+    })
+    test('post', async () => {
+      expect(
+        ((await router.serve(
+          {
+            path: '/user/data',
+            token: 1,
+            httpMethod: 'POST',
+            headers: {},
+            body: JSON.stringify({ body: { a: 1 } }),
+          },
+          uniCloudContext
+        )) as any).body
+      ).toEqual(JSON.stringify({ a: 1 }))
+    })
   })
 })

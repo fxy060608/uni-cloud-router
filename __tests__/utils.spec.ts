@@ -1,9 +1,10 @@
+import { Context } from '../src/Router'
 import { createRouteMatch, MatchOptions } from '../src/utils'
 
 function createRouteMatchAlias(options?: MatchOptions) {
   const matchFn = createRouteMatch(options)
   return function (action: string) {
-    return matchFn({ event: { action } })
+    return matchFn({ event: { action } } as Context)
   }
 }
 
