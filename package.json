@@ -1,6 +1,6 @@
 {
   "name": "uni-cloud-router",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.js",
   "files": [
@@ -16,7 +16,7 @@
   },
   "keywords": [],
   "author": "fxy060608",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@cloudbase/database": "^1.2.2",
     "@rollup/plugin-node-resolve": "^9.0.0",

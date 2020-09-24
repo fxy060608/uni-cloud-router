@@ -2,6 +2,7 @@ import path from 'path'
 import { Next } from 'koa'
 
 import { Context, Router } from '../src/Router'
+import { FAILED_CODE } from '../src/utils'
 const baseDir = path.resolve(__dirname, './example')
 const router = new Router({
   baseDir,
@@ -23,24 +24,32 @@ describe('Router', () => {
     }).toThrow('middleware must be a function')
   })
   test('action is required', async () => {
-    await expect(router.serve({}, uniCloudContext)).rejects.toEqual(
-      new Error('action is required')
-    )
+    expect(await router.serve({}, uniCloudContext)).toEqual({
+      code: FAILED_CODE,
+      message: 'action is required',
+    })
   })
   test('action must contain "/"', async () => {
-    await expect(
-      router.serve({ action: 'user' }, uniCloudContext)
-    ).rejects.toEqual(new Error('action must contain "/"'))
+    expect(await router.serve({ action: 'user' }, uniCloudContext)).toEqual({
+      code: FAILED_CODE,
+      message: 'action must contain "/"',
+    })
   })
   test('controller is not found', async () => {
-    await expect(
-      router.serve({ action: 'admin/login' }, uniCloudContext)
-    ).rejects.toEqual(new Error(`controller/admin not found`))
+    expect(
+      await router.serve({ action: 'admin/login' }, uniCloudContext)
+    ).toEqual({
+      code: FAILED_CODE,
+      message: 'controller/admin not found',
+    })
   })
   test('method is not a function', async () => {
-    await expect(
-      router.serve({ action: 'user/logout' }, uniCloudContext)
-    ).rejects.toEqual(new Error(`controller/user.logout is not a function`))
+    expect(
+      await router.serve({ action: 'user/logout' }, uniCloudContext)
+    ).toEqual({
+      code: FAILED_CODE,
+      message: 'controller/user.logout is not a function',
+    })
   })
   test('auth failed', async () => {
     expect(
@@ -55,7 +64,7 @@ describe('Router', () => {
       await router
         .use(auth)
         .serve({ action: 'user/update', token: '123' }, uniCloudContext)
-    ).toStrictEqual({ id: 1 })
+    ).toEqual({ id: 1 })
   })
   test('data', async () => {
     expect(
@@ -67,14 +76,18 @@ describe('Router', () => {
   })
   describe('http', () => {
     test('action must contain "/"', async () => {
-      await expect(
-        router.serve({ path: '/user' }, uniCloudContext)
-      ).rejects.toEqual(new Error('action must contain "/"'))
+      expect(await router.serve({ path: '/user' }, uniCloudContext)).toEqual({
+        code: FAILED_CODE,
+        message: 'action must contain "/"',
+      })
     })
     test('controller is not found', async () => {
-      await expect(
-        router.serve({ path: '/admin/login' }, uniCloudContext)
-      ).rejects.toEqual(new Error(`controller/admin not found`))
+      expect(
+        await router.serve({ path: '/admin/login' }, uniCloudContext)
+      ).toEqual({
+        code: FAILED_CODE,
+        message: 'controller/admin not found',
+      })
     })
     test('auth failed', async () => {
       expect(

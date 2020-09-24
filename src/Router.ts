@@ -12,6 +12,7 @@ import {
 } from './utils'
 import { createContext, ExtendableContext } from './BaseContext'
 import { http, parseAction } from './middleware/http'
+import { error } from './middleware/error'
 
 type ConfigMiddleware<StateT = DefaultState, CustomT = DefaultContext> = Array<
   [Middleware<StateT, CustomT>, MatchOptions?]
@@ -86,18 +87,21 @@ export class Router<
       this.serviceDir,
       this.controllerDir
     )
-    const fn = compose(this.middleware.concat(this.controller(ctx)))
+
+    const controller = this.controller(ctx)
+    let fn: Function
+    if (controller._name === 'error') {
+      fn = compose([http, controller])
+    } else {
+      fn = compose(this.middleware.concat(controller))
+    }
     return new Promise((resolve) => {
       fn(ctx)
         .then(() => {
           resolve(this.respond(ctx))
         })
-        .catch((err) => {
-          ctx.body = {
-            code: err.code || FAILED_CODE,
-            message: err.message || err,
-          }
-          resolve(this.respond(ctx))
+        .catch((err: any) => {
+          resolve(this.failed(err))
         })
     })
   }
@@ -127,12 +131,12 @@ export class Router<
   private controller(ctx: Context) {
     const action = parseAction(ctx.event)
     if (!action) {
-      throw new Error('action is required')
+      return error('action is required')
     }
     const paths = action.split('/').filter(Boolean)
     const len = paths.length
     if (len === 1) {
-      throw new Error('action must contain "/"')
+      return error('action must contain "/"')
     }
     const methodName = paths[len - 1]
     let controller = ctx.controller
@@ -140,7 +144,7 @@ export class Router<
       controller = controller[paths[i]]
     }
     if (!controller) {
-      throw new Error(
+      return error(
         `controller/${action.replace(
           new RegExp('/' + methodName + '$'),
           ''
@@ -149,7 +153,7 @@ export class Router<
     }
     const method = controller[methodName]
     if (typeof method !== 'function') {
-      throw new Error(
+      return error(
         `controller/${action.replace(
           new RegExp('/' + methodName + '$'),
           '.' + methodName
@@ -164,6 +168,12 @@ export class Router<
     }
     middleware._name = methodName
     return middleware
+  }
+  private failed(err: any) {
+    return {
+      code: err.code || FAILED_CODE,
+      message: err.message || err,
+    }
   }
   private respond(ctx: Context) {
     return ctx.body
