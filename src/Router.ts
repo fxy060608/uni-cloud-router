@@ -63,26 +63,6 @@ export class Router<
 
     this.initMiddleware(middleware)
   }
-  initMiddleware(middleware?: ConfigMiddleware<StateT, CustomT>) {
-    this.use(http) // http url
-    if (!Array.isArray(middleware)) {
-      return
-    }
-    middleware.forEach(([mw, options]) => {
-      this.use(mw, options)
-    })
-  }
-  wrapMiddleware(fn: Middleware<StateT, CustomT>, options?: MiddlewareOptions) {
-    const matchFn = createRouteMatch(options)
-    const mw = (ctx: ParameterizedContext<StateT, CustomT>, next: Next) => {
-      if (!matchFn(ctx)) {
-        return next()
-      }
-      return fn(ctx, next)
-    }
-    mw._name = (fn as any)._name || fn.name
-    return mw
-  }
   /**
    * Use the given middleware `fn`
    * @param middleware
@@ -122,7 +102,30 @@ export class Router<
         })
     })
   }
-  controller(ctx: Context) {
+  private initMiddleware(middleware?: ConfigMiddleware<StateT, CustomT>) {
+    this.use(http) // http url
+    if (!Array.isArray(middleware)) {
+      return
+    }
+    middleware.forEach(([mw, options]) => {
+      this.use(mw, options)
+    })
+  }
+  private wrapMiddleware(
+    fn: Middleware<StateT, CustomT>,
+    options?: MiddlewareOptions
+  ) {
+    const matchFn = createRouteMatch(options)
+    const mw = (ctx: ParameterizedContext<StateT, CustomT>, next: Next) => {
+      if (!matchFn(ctx)) {
+        return next()
+      }
+      return fn(ctx, next)
+    }
+    mw._name = (fn as any)._name || fn.name
+    return mw
+  }
+  private controller(ctx: Context) {
     const action = parseAction(ctx.event)
     if (!action) {
       throw new Error('action is required')
@@ -163,7 +166,7 @@ export class Router<
     middleware._name = methodName
     return middleware
   }
-  respond(ctx: Context) {
+  private respond(ctx: Context) {
     return ctx.body
   }
 }
