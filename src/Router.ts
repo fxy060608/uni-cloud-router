@@ -86,8 +86,7 @@ export class Router<
       this.serviceDir,
       this.controllerDir
     )
-    const controller = this.controller(ctx)
-    const fn = compose(this.middleware.concat(controller))
+    const fn = compose(this.middleware.concat(this.controller(ctx)))
     return new Promise((resolve) => {
       fn(ctx)
         .then(() => {

@@ -33,7 +33,7 @@ function initContextType(headers: Data) {
   }
 }
 
-function initCtx(ctx: Context, isHttpRequest: boolean) {
+function extend(ctx: Context, isHttpRequest: boolean) {
   if (isHttpRequest) {
     const { headers, httpMethod, body, queryStringParameters } = ctx.event
     initContextType(headers)
@@ -79,7 +79,7 @@ export function parseAction(event: UniCloudEvent) {
 
 export async function http(ctx: Context, next: Next) {
   const isHttpRequest = isHttp(ctx.event, ctx.context)
-  initCtx(ctx, isHttpRequest)
+  extend(ctx, isHttpRequest)
   if (!isHttpRequest) {
     await next()
   } else {
