@@ -281,7 +281,7 @@ uni.request({
 
 ### 返回结果
 
-```json
+```js
 {
   "code": "", // 异常 code，如："INVOKE_FUNCTION_FAILED"
   "message": "" // 异常信息
