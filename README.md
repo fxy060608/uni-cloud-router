@@ -137,7 +137,7 @@ class PostController extends Controller {
 }
 ```
 
-Service 的具体写法，请查看 [Service](#服务（service）) 章节。
+Service 的具体写法，请查看 [Service](#服务service) 章节。
 
 3. 定制 URL 化返回的状态码
 
