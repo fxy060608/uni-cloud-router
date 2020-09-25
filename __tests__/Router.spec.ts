@@ -69,7 +69,7 @@ describe('Router', () => {
   test('data', async () => {
     expect(
       await router.serve(
-        { action: 'user/data', token: 1, body: { a: 1 } },
+        { action: 'user/data', token: 1, data: { a: 1 } },
         uniCloudContext
       )
     ).toEqual({ a: 1 })
@@ -105,7 +105,7 @@ describe('Router', () => {
             token: 1,
             httpMethod: 'GET',
             headers: {},
-            queryStringParameters: { body: { a: 1 } },
+            queryStringParameters: { a: 1 },
           },
           uniCloudContext
         )) as any).body
@@ -119,7 +119,7 @@ describe('Router', () => {
             token: 1,
             httpMethod: 'POST',
             headers: {},
-            body: JSON.stringify({ body: { a: 1 } }),
+            body: JSON.stringify({ a: 1 }),
           },
           uniCloudContext
         )) as any).body

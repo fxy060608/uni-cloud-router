@@ -4,8 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "files": [
-    "dist",
-    "LICENSE"
+    "dist"
   ],
   "scripts": {
     "test": "jest",

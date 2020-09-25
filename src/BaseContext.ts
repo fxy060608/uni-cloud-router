@@ -70,7 +70,7 @@ export function createContext<StateT = DefaultState, CustomT = DefaultContext>(
   ctx.controller = noader(controllerDir, ctx)
   // request
   ctx.query = Object.create(null)
-  ctx.data = event
+  ctx.data = event.data || Object.create(null)
   // response
   ctx.status = 200
   ctx.headers = Object.create(null)

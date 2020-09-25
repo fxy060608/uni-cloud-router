@@ -10,6 +10,6 @@ module.exports = class UserControoler extends Controller {
   }
   async data() {
     const { ctx } = this
-    return ctx.data.body
+    return ctx.data
   }
 }
