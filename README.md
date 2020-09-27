@@ -105,7 +105,7 @@ module.exports = class PostController extends Controller {
 
 1. data 请求参数列表
 
-支持获取通过 callFunction 或 URL 化的 GET,POST 发送的请求参数
+callFunction 或 URL 化的 GET,POST 等发送的请求参数
 
 ```js
 class PostController extends Controller {
@@ -215,7 +215,7 @@ module.exports = (options) => {
 
 #### 使用中间件
 
-1. 通过 config.js 配置，(该配置需要以参数的形式传入 Router 的构造函数)
+1. 通过 config.js 配置
 
 ```js
 const auth = require('./middleware/auth.js') // 引入 auth 中间件
@@ -256,7 +256,7 @@ module.exports = {
 uniCloud.callFunction({
   name: 'router', // 要调用的云函数名称
   data: {
-    action: 'user/login', // 路由地址，对应 controller 下的 user.js 的 login 访问
+    action: 'user/login', // 路由地址，对应 controller 下 user.js 的 login 方法
     // 参数列表
     data: {
       // controller 通过 this.ctx.data 获取
@@ -270,7 +270,7 @@ uniCloud.callFunction({
 ```js
 // 使用 URL 化 request 访问
 uni.request({
-  url: 'xxxxx/router/user/login', // 路由地址，对应 controller 下的 user.js 的 login 访问
+  url: 'xxxxx/router/user/login', // 路由地址，对应 controller 下 user.js 的 login 方法
   data: {
     // controller 通过 this.ctx.data 获取
     username: 'demo',
