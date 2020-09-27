@@ -278,7 +278,7 @@ Context 是一个请求级别的对象，在每一次收到用户请求时，会
 
 #### 获取方式
 
-最常见的 Context 实例获取方式是在 [Middleware](#中间件), [Controller](#控制器controller) 以及 [Service](#服务service) 中。
+最常见的 Context 实例获取方式是在 [Middleware](#中间件middleware), [Controller](#控制器controller) 以及 [Service](#服务service) 中。
 
 ```js
 // 在 Controller 中通过 this.ctx 获取 Context 实例
