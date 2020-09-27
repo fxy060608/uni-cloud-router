@@ -2,6 +2,29 @@
 
 > 基于 koa 风格的 uniCloud 云函数路由库，同时支持 uniCloud 客户端及 URL 化访问
 
+---
+
+- [云函数端](#云函数端)
+  - [安装](#安装)
+  - [目录结构](#目录结构)
+  - [控制器（Controller）](#控制器controller)
+    - [如何编写 Controller](#如何编写controller)
+    - [获取请求参数](#获取请求参数)
+    - [调用 Service](#调用service)
+    - [定制 URL 化返回的状态码](#定制url化返回的状态码)
+  - [服务（Service）](#服务service)
+    - [使用场景](#使用场景)
+    - [如何编写 Service](#如何编写service)
+    - [使用 Service](#使用service)
+  - [中间件（Middleware）](#中间件middleware)
+    - [开发中间件](#开发中间件)
+    - [使用中间件](#使用中间件)
+  - [Context](#context)
+    - [获取方式](#获取方式)
+- [客户端](#客户端)
+  - [发送请求](#发送请求)
+  - [返回结果](#返回结果)
+
 ## 云函数端
 
 ### 安装
@@ -58,7 +81,7 @@ module.exports = class UserController extends Controller {
 
 ### 控制器（Controller）
 
-负责解析用户的输入，处理后返回相应的结果
+负责解析用户的输入，处理后返回相应的结果。
 
 推荐 Controller 层主要对用户的请求参数进行处理（校验、转换），然后调用对应的 service 方法处理业务，得到业务结果后封装并返回：
 
@@ -98,14 +121,11 @@ module.exports = class PostController extends Controller {
 - `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等价于 `this.ctx.service`。
 - `this.db`：等同于 `uniCloud.database()`。
 - `this.curl`：等同于 `uniCloud.httpclient.request`。
+- `this.throw`：抛出异常信息，等价于 `this.ctx.throw`。
 
 #### 获取请求参数
 
-通过在 Controller 上绑定的 Context 实例，提供了许多便捷方法和属性获取请求发送过来的参数
-
-1. data 请求参数列表
-
-callFunction 或 URL 化的 GET,POST 等发送的请求参数
+通过在 Controller 上绑定的 Context 实例的 data 属性，获取请求发送过来的参数
 
 ```js
 class PostController extends Controller {
@@ -119,7 +139,7 @@ class PostController extends Controller {
 }
 ```
 
-2. 调用 Service
+#### 调用 Service
 
 通过 Service 层进行业务逻辑的封装，不仅能提高代码的复用性，同时可以让业务逻辑更好测试。
 
@@ -139,7 +159,7 @@ class PostController extends Controller {
 
 Service 的具体写法，请查看 [Service](#服务service) 章节。
 
-3. 定制 URL 化返回的状态码
+#### 定制 URL 化返回的状态码
 
 ```js
 class PostController extends Controller {
@@ -184,8 +204,13 @@ module.exports = class PostService extends Service {
 - `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等价于 `this.ctx.service`。
 - `this.db`：等同于 `uniCloud.database()`。
 - `this.curl`：等同于 `uniCloud.httpclient.request`。
+- `this.throw`：抛出异常信息，等价于 `this.ctx.throw`。
 
-### 中间件
+#### 使用 Service
+
+[在 Controller 中调用 Service](#调用service)
+
+### 中间件（Middleware）
 
 在路由请求前，后添加处理逻辑，实现一些特定功能，如：用户登录，权限校验等
 
@@ -246,6 +271,43 @@ module.exports = {
 - ignore 设置符合某些规则的请求不经过这个中间件。
 
   支持类型：同 match
+
+### Context
+
+Context 是一个请求级别的对象，在每一次收到用户请求时，会实例化一个 Context 对象，这个对象封装了这次用户请求的信息，并提供了许多便捷的方法来获取请求参数或者设置响应信息。框架会将所有的 Service 挂载到 Context 实例上
+
+#### 获取方式
+
+最常见的 Context 实例获取方式是在 [Middleware](#中间件), [Controller](#控制器controller) 以及 [Service](#服务service) 中。
+
+```js
+// 在 Controller 中通过 this.ctx 获取 Context 实例
+module.exports = class UserController extends Controller {
+  async login() {
+    const data = this.ctx.data // 从 Context 实例上获取请求参数
+  }
+}
+```
+
+```js
+// 在 Service 中通过 this.ctx 获取 Context 实例
+module.exports = class PostService extends Service {
+  async create(data) {
+    const auth = this.ctx.auth // 从 Context 实例上获取 auth(需要启用 uni-id 中间件)
+  }
+}
+```
+
+```js
+// 在 Middleware 中通过 ctx 参数获取 Context 实例
+module.exports = (options) => {
+  // 返回中间件函数
+  return async function auth(ctx, next) {
+    const data = ctx.data // 从 Context 实例上获取请求参数
+    await next()
+  }
+}
+```
 
 ## 客户端
 

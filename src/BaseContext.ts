@@ -4,7 +4,7 @@ import { DefaultContext, DefaultState } from 'koa'
 import noader from 'noader'
 
 import { Context } from './Router'
-import { runInUniCloud } from './utils'
+import { FAILED_CODE, runInUniCloud } from './utils'
 
 export interface ExtendableContext {
   event: {
@@ -24,6 +24,8 @@ export interface ExtendableContext {
   set(_field: { [key: string]: string }): void // http only
   set(_field: string, _val: string | string[]): void // http only
   body: Record<string, any>
+  throw(_message: string): never
+  throw(_code: string | number, _message: string): never
   // uniCloud
   db: Db
   curl: typeof request
@@ -38,6 +40,7 @@ export class BaseContext {
   controller: Record<string, any>
   curl: typeof request
   httpclient: HttpClient
+  throw: ExtendableContext['throw']
 
   constructor(ctx: Context) {
     this.ctx = ctx
@@ -45,6 +48,7 @@ export class BaseContext {
     this.config = ctx.config
     this.service = ctx.service
     this.controller = ctx.controller
+    this.throw = ctx.throw
     // uniCloud
     this.db = ctx.db
     this.curl = ctx.curl
@@ -74,6 +78,15 @@ export function createContext<StateT = DefaultState, CustomT = DefaultContext>(
   // response
   ctx.status = 200
   ctx.headers = Object.create(null)
+  ctx.throw = (code?: string | number, message?: string) => {
+    if (message) {
+      throw {
+        code,
+        message,
+      }
+    }
+    throw { code: FAILED_CODE, message: code }
+  }
   // uniCloud
   if (runInUniCloud) {
     ctx.db = uniCloud.database()

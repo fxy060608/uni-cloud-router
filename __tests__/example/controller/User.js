@@ -12,4 +12,12 @@ module.exports = class UserControoler extends Controller {
     const { ctx } = this
     return ctx.data
   }
+
+  async throwByController() {
+    return this.throw('C_USER_ERR', 'ERROR')
+  }
+
+  async throwByService() {
+    return this.service.user.error()
+  }
 }

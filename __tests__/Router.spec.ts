@@ -53,7 +53,11 @@ describe('Router', () => {
   })
   test('auth failed', async () => {
     expect(
-      await router.use(auth).serve({ action: 'user/update' }, uniCloudContext)
+      await new Router({
+        baseDir,
+      })
+        .use(auth)
+        .serve({ action: 'user/update' }, uniCloudContext)
     ).toEqual({
       code: 20001,
       message: 'auth failed',
@@ -61,7 +65,9 @@ describe('Router', () => {
   })
   test('auth success', async () => {
     expect(
-      await router
+      await new Router({
+        baseDir,
+      })
         .use(auth)
         .serve({ action: 'user/update', token: '123' }, uniCloudContext)
     ).toEqual({ id: 1 })
@@ -69,10 +75,27 @@ describe('Router', () => {
   test('data', async () => {
     expect(
       await router.serve(
-        { action: 'user/data', token: 1, data: { a: 1 } },
+        { action: 'user/data', data: { a: 1 } },
         uniCloudContext
       )
     ).toEqual({ a: 1 })
+  })
+  test('throw by middleware', async () => {
+    expect(
+      await new Router({ baseDir })
+        .use((ctx) => ctx.throw('ERROR'))
+        .serve({ action: 'user/login' }, uniCloudContext)
+    ).toEqual({ code: FAILED_CODE, message: 'ERROR' })
+  })
+  test('throw by controller', async () => {
+    expect(
+      await router.serve({ action: 'user/throwByController' }, uniCloudContext)
+    ).toEqual({ code: 'C_USER_ERR', message: 'ERROR' })
+  })
+  test('throw by service', async () => {
+    expect(
+      await router.serve({ action: 'user/throwByService' }, uniCloudContext)
+    ).toEqual({ code: 'S_USER_ERR', message: 'ERROR' })
   })
   describe('http', () => {
     test('action must contain "/"', async () => {
