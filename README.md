@@ -208,7 +208,7 @@ module.exports = class PostService extends Service {
 
 #### 使用 Service
 
-[在 Controller 中调用 Service](#调用service)
+[在 Controller 中调用 Service](#调用-service)
 
 ### 中间件（Middleware）
 
