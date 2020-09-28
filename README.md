@@ -118,10 +118,10 @@ module.exports = class PostController extends Controller {
 定义的 Controller 类，会在每一个请求访问时实例化一个全新的对象，会有下面几个属性挂在 `this` 上。
 
 - `this.ctx`：当前请求的上下文对象的实例，通过它我们可以拿到各种便捷属性和方法。
-- `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等价于 `this.ctx.service`。
+- `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等同于 `this.ctx.service`。
 - `this.db`：等同于 `uniCloud.database()`。
 - `this.curl`：等同于 `uniCloud.httpclient.request`。
-- `this.throw`：抛出异常信息，等价于 `this.ctx.throw`。
+- `this.throw`：抛出异常信息，等同于 `this.ctx.throw`。
 
 #### 获取请求参数
 
@@ -201,10 +201,10 @@ module.exports = class PostService extends Service {
 定义的 Service 类是懒加载的，只有当访问到它的时候才会去实例化它，会有下面几个属性挂在 `this` 上。
 
 - `this.ctx`：当前请求的上下文对象的实例，通过它我们可以拿到各种便捷属性和方法。
-- `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等价于 `this.ctx.service`。
+- `this.service`：应用定义的 service，通过它我们可以访问到抽象出的业务层，等同于 `this.ctx.service`。
 - `this.db`：等同于 `uniCloud.database()`。
 - `this.curl`：等同于 `uniCloud.httpclient.request`。
-- `this.throw`：抛出异常信息，等价于 `this.ctx.throw`。
+- `this.throw`：抛出异常信息，等同于 `this.ctx.throw`。
 
 #### 使用 Service
 
