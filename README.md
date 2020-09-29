@@ -239,6 +239,12 @@ module.exports = (options) => {
 }
 ```
 
+示例：
+
+- [uni-id 校验 token 中间件](https://github.com/dcloudio/uni-template-admin/blob/master/cloudfunctions-aliyun/uni-admin/middleware/auth.js)
+- [uni-id 校验 permission 中间件](https://github.com/dcloudio/uni-template-admin/blob/master/cloudfunctions-aliyun/uni-admin/middleware/permission.js)
+- [云函数 URL 化中间件](https://github.com/fxy060608/uni-cloud-router/blob/master/src/middleware/http.ts)
+
 #### 使用中间件
 
 1. 通过 config.js 配置
@@ -348,7 +354,8 @@ uni.request({
 ```js
 {
   "code": "", // 异常 code，如："INVOKE_FUNCTION_FAILED"
-  "message": "" // 异常信息
+  "message": "", // 异常信息
+  "stack": "" // 当 config.js 中配置 debug 为 true 时，返回发生异常的堆栈信息
   // 其他信息
 }
 ```
