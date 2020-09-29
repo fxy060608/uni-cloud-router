@@ -57,6 +57,7 @@ exports.main = async (event, context) => {
 ```js
 // config.js
 module.exports = {
+  debug: true, // 调试模式时，将返回 stack 错误堆栈
   baseDir: __dirname, // 必选，应用根目录
   middleware: [], // 自定义中间件
 }
@@ -245,6 +246,7 @@ module.exports = (options) => {
 ```js
 const auth = require('./middleware/auth.js') // 引入 auth 中间件
 module.exports = {
+  debug: true, // 调试模式时，将返回 stack 错误堆栈
   baseDir: __dirname, // 指定应用根目录
   middleware: [
     [

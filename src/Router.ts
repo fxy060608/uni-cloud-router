@@ -19,6 +19,7 @@ type ConfigMiddleware<StateT = DefaultState, CustomT = DefaultContext> = Array<
 >
 
 interface RouterOptions<StateT = DefaultState, CustomT = DefaultContext> {
+  debug?: boolean
   baseDir: string
   middleware?: ConfigMiddleware
 }
@@ -170,10 +171,14 @@ export class Router<
     return middleware
   }
   private failed(err: any) {
-    return {
+    const ret = {
       code: err.code || FAILED_CODE,
       message: err.message || err,
     }
+    if (this.config.debug === true) {
+      ;(ret as any).stack = err.stack || ''
+    }
+    return ret
   }
   private respond(ctx: Context) {
     return ctx.body

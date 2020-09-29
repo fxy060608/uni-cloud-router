@@ -87,14 +87,18 @@ export async function http(ctx: Context, next: Next) {
     try {
       await next()
     } catch (e) {
+      const ret = {
+        code: e.code || FAILED_CODE,
+        message: e.message,
+      }
+      if (ctx.config.debug === true) {
+        ;(ret as any).stack = e.stack
+      }
       return (ctx.body = {
         mpserverlessComposedResponse: true, //aliyun
         statusCode: 400,
         headers: contentTypeHeader,
-        body: JSON.stringify({
-          code: e.code || FAILED_CODE,
-          message: e.message,
-        }),
+        body: JSON.stringify(ret),
       })
     }
     const contextType = ctx.headers[CONTENT_TYPE] || JSON_TYPE

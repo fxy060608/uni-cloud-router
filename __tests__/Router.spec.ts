@@ -97,6 +97,14 @@ describe('Router', () => {
       await router.serve({ action: 'user/throwByService' }, uniCloudContext)
     ).toEqual({ code: 'S_USER_ERR', message: 'ERROR' })
   })
+  test('stack', async () => {
+    expect(
+      ((await new Router({ baseDir, debug: true }).serve(
+        { action: 'user/error' },
+        uniCloudContext
+      )) as any).stack
+    ).toBeTruthy()
+  })
   describe('http', () => {
     test('action must contain "/"', async () => {
       expect(await router.serve({ path: '/user' }, uniCloudContext)).toEqual({
@@ -148,5 +156,18 @@ describe('Router', () => {
         )) as any).body
       ).toEqual(JSON.stringify({ a: 1 }))
     })
+  })
+
+  test('get stack', async () => {
+    expect(
+      ((await new Router({ baseDir, debug: true }).serve(
+        {
+          path: '/user/error',
+          httpMethod: 'GET',
+          headers: {},
+        },
+        uniCloudContext
+      )) as any).body
+    ).toContain('"stack":')
   })
 })

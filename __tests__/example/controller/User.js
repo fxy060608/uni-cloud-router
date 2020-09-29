@@ -13,6 +13,10 @@ module.exports = class UserControoler extends Controller {
     return ctx.data
   }
 
+  async error(){
+    throw new Error('123')
+  }
+
   async throwByController() {
     return this.throw('C_USER_ERR', 'ERROR')
   }
