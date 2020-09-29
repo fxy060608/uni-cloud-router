@@ -92,7 +92,7 @@ export async function http(ctx: Context, next: Next) {
         message: e.message,
       }
       if (ctx.config.debug === true) {
-        ;(ret as any).stack = e.stack
+        ;(ret as any).stack = e.stack || ''
       }
       return (ctx.body = {
         mpserverlessComposedResponse: true, //aliyun

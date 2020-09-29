@@ -40,7 +40,9 @@ export type Context<
   StateT = DefaultState,
   CustomT = DefaultContext
 > = ParameterizedContext<StateT, CustomT>
-export interface MiddlewareOptions extends MatchOptions {}
+export interface MiddlewareOptions extends MatchOptions {
+  name?: string
+}
 
 const SERVICE_DIR = 'service'
 const CONTROLLER_DIR = 'controller'
@@ -107,7 +109,7 @@ export class Router<
     })
   }
   private initMiddleware(middleware?: ConfigMiddleware<StateT, CustomT>) {
-    this.use(http) // http url
+    this.use(http, { name: 'http' }) // http url
     if (!Array.isArray(middleware)) {
       return
     }
@@ -124,9 +126,18 @@ export class Router<
       if (!matchFn(ctx)) {
         return next()
       }
+      if (this.config.debug === true) {
+        mw._name !== 'http' &&
+          console.log(`${ctx.event.action}: use ${mw._name}`)
+      }
       return fn(ctx, next)
     }
-    mw._name = (fn as any)._name || fn.name
+    if (options && options.name) {
+      mw._name = options.name
+    }
+    if (!mw._name) {
+      mw._name = (fn as any)._name || fn.name
+    }
     return mw
   }
   private controller(ctx: Context) {
