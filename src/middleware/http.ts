@@ -95,7 +95,7 @@ export async function http(ctx: Context, next: Next) {
         ;(ret as any).stack = e.stack || ''
       }
       return (ctx.body = {
-        mpserverlessComposedResponse: true, //aliyun
+        mpserverlessComposedResponse: true, // aliyun
         statusCode: 400,
         headers: contentTypeHeader,
         body: JSON.stringify(ret),
@@ -103,7 +103,7 @@ export async function http(ctx: Context, next: Next) {
     }
     const contextType = ctx.headers[CONTENT_TYPE] || JSON_TYPE
     ctx.body = {
-      mpserverlessComposedResponse: true, //aliyun
+      mpserverlessComposedResponse: true, // aliyun
       isBase64Encoded: !!ctx.isBase64Encoded,
       statusCode: ctx.status,
       headers: Object.assign(ctx.headers, { [CONTENT_TYPE]: contextType }),
