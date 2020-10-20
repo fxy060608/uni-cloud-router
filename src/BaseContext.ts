@@ -54,6 +54,16 @@ export class BaseContext {
     this.curl = ctx.curl
     this.httpclient = ctx.httpclient
   }
+
+  pick(obj: Record<string, any>, keys: string | string[]) {
+    obj = obj || {}
+    if ('string' == typeof keys) keys = keys.split(/ +/)
+    return keys.reduce(function (ret, key) {
+      if (null == obj[key]) return ret
+      ret[key] = obj[key]
+      return ret
+    }, {} as Record<string, any>)
+  }
 }
 
 export function createContext<StateT = DefaultState, CustomT = DefaultContext>(
