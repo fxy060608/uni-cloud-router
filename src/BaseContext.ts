@@ -100,7 +100,7 @@ export function createContext<StateT = DefaultState, CustomT = DefaultContext>(
   // uniCloud
   if (runInUniCloud) {
     ctx.db = uniCloud.database()
-    ctx.curl = uniCloud.httpclient.request
+    ctx.curl = uniCloud.httpclient.request.bind(uniCloud.httpclient)
     ctx.httpclient = uniCloud.httpclient
   }
   return ctx
