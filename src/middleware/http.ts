@@ -74,7 +74,11 @@ export function parseAction(event: UniCloudEvent) {
   if (!event.action && event.path) {
     event.action = event.path.substr(1)
   }
-  return event.action as string
+  let action = String(event.action || '')
+  if (action.startsWith('/')) {
+    event.action = action = action.substr(1)
+  }
+  return action
 }
 
 export async function http(ctx: Context, next: Next) {
