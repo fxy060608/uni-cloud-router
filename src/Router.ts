@@ -126,10 +126,6 @@ export class Router<
       if (!matchFn(ctx)) {
         return next()
       }
-      if (this.config.debug === true) {
-        mw._name !== 'http' &&
-          console.log(`${ctx.event.action}: use ${mw._name}`)
-      }
       return fn(ctx, next)
     }
     if (options && options.name) {
