@@ -1,7 +1,8 @@
 import { Next } from 'koa'
 import { parse } from 'querystring'
-import { Context } from '../Router'
-import { FAILED_CODE } from '../utils'
+import { Context } from '../../Router'
+import { FAILED_CODE } from '../../utils'
+import { isFormType, isJsonType } from './type'
 
 function isHttp(event: UniCloudEvent, ctx: UniCloudContext) {
   const env = (ctx as any).env
@@ -17,7 +18,6 @@ const isObject = (field: unknown): field is Data => typeof field !== 'string'
 
 const CONTENT_TYPE = 'content-type'
 const JSON_TYPE = 'application/json'
-const FORM_TYPE = 'application/x-www-form-urlencoded'
 
 function initContextType(headers: Data) {
   const key = Object.keys(headers).find(
@@ -43,12 +43,12 @@ function extend(ctx: Context, isHttpRequest: boolean) {
     } else {
       ctx.data = Object.create(null)
       if (body) {
-        const contextType = headers[CONTENT_TYPE]
-        if (contextType === JSON_TYPE) {
+        const contentType = headers[CONTENT_TYPE]
+        if (isJsonType(contentType)) {
           try {
             ctx.data = JSON.parse(body)
           } catch (e) {}
-        } else if (contextType === FORM_TYPE) {
+        } else if (isFormType(contentType)) {
           ctx.data = parse(body)
         }
       }
