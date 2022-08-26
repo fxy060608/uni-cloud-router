@@ -24,7 +24,7 @@ function initContextType(headers: Data) {
     (key) => key.toLowerCase() === CONTENT_TYPE
   )
   if (key) {
-    headers[CONTENT_TYPE] = headers[key].toLowerCase()
+    headers[CONTENT_TYPE] = headers[key]
     if (key !== CONTENT_TYPE) {
       delete headers[key]
     }
